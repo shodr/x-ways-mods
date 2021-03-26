@@ -48,11 +48,20 @@ for /d %%i in (%SourceParentDir%\*) do (
 	
 	rem get list of pdf files
 	(for /R %%a in (*.pdf) do (
+		
+		set "shortPrefix=!originalPDF:~0,8%!"
+		
+		set "pathCover=!TargetDir!\cover\!shortPrefix!%%~na"
+		
 		set "files=!files! "%%~fa""
 		
 		set "mdFileName=%%~fa"
 		
-		echo * !mdFileName:~9,-4!>>"%SourceParentDir%\!originalPDF!.attachments.md"
+		echo !mdFileName:~9!>>"!pathCover!.md"
+		
+		call :CreateCoverMD
+		
+		echo * !mdFileName:~9!>>"%SourceParentDir%\!originalPDF!.attachments.md"
 	)
 	
 	rem combine pdf files
@@ -79,9 +88,11 @@ exit /b
 echo "!originalPDF!">> %SourceParentDir%\data_A.txt
 exit /b
 
+:CreateCoverMD
+ebook-convert  "!pathCover!.md" "!pathCover!.md.pdf" --input-encoding utf-8 --formatting-type markdown
 
 :CreatePDFfromTXT
-ebook-convert "%SourceParentDir%\!originalPDF!.attachments.md" "%TargetDir%\tmp\!originalPDF!.attachments.md.pdf"
+ebook-convert "%SourceParentDir%\!originalPDF!.attachments.md" "%TargetDir%\tmp\!originalPDF!.attachments.md.pdf" --input-encoding utf-8 --formatting-type markdown
 exit /b
 
 :CopyPDF
